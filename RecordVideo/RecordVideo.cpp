@@ -11,7 +11,7 @@
 #include "CameraImage.h"
 #include "CameraStatus.h"
 #include "SerialDll.h"
-
+#define LONTH 300
 using namespace std;
 
 INT	cameraNum = 2;
@@ -61,15 +61,15 @@ public:
 			CameraSetCallbackFunction(m_hCamera, CameraCallBackTwo, (PVOID)this, NULL);
 		}
 
+		CameraGetCapability(m_hCamera, &m_sCameraInfo);
 		FrameBufferRGB24 = CameraAlignMalloc(
 			m_sCameraInfo.sResolutionRange.iWidthMax*m_sCameraInfo.sResolutionRange.iHeightMax * 3,
 			16);
-		CameraGetCapability(m_hCamera, &m_sCameraInfo);
 		CameraSetAeState(m_hCamera, false);
 		CameraPlay(m_hCamera);
 		printf("相机%d初始化完成\n", m_hCamera);
 
-		for (size_t i = 0; i < 160; i++)
+		for (size_t i = 0; i < LONTH; i++)
 		{
 			ImageData data;
 			data.pFrameBuffer = CameraAlignMalloc(
@@ -85,20 +85,20 @@ public:
 		{
 			swap(FrameBufferRGB24, m_Buffer[m_BufIdx].pFrameBuffer);
 			m_Buffer[m_BufIdx].pFrameHead = *pFrameHead;
-			m_BufIdx = m_BufIdx + 1 < 160 ? m_BufIdx + 1 : 0;
+			m_BufIdx = m_BufIdx + 1 < LONTH ? m_BufIdx + 1 : 0;
 		}
 	}
 	void saveVideo()
 	{
 		char name[64];
 		sprintf_s(name, "C:/CameraRecord/sucai%d.avi", m_hCamera);
-		CameraInitRecord(m_hCamera, 1, name, true, 60, 60);
+		CameraInitRecord(m_hCamera,1, name, true, 80, 60);
 		int i = m_BufIdx;
 		do
 		{
 			CameraPushFrame(m_hCamera,m_Buffer[i].pFrameBuffer,&m_Buffer[i].pFrameHead);
-			i = i + 1 < 160 ? i + 1 : 0;
-		} while (i == m_BufIdx);
+			i = i + 1 < LONTH ? i + 1 : 0;
+		} while (i != m_BufIdx);
 		CameraStopRecord(m_hCamera);
 	}
 };
@@ -127,11 +127,11 @@ int _tmain(int argc, _TCHAR* argv[])
 	while (true)
 	{
 		int msg = fetch_msg();
-		printf("消息：%d\n", msg);
 		if (isVideoOK || msg == 0||cueMsg == msg)
 		{
 			continue;
 		}
+		printf("消息：%d\n", msg);
 		cueMsg = msg;
 		switch (cueMsg)
 		{
