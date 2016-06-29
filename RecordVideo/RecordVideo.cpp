@@ -16,6 +16,7 @@ using namespace std;
 INT	cameraNum = 2;
 tSdkCameraDevInfo	cameraInfo[2];
 int VideoLenth = 200;
+int VideoSleep = 800;
 
 struct ImageData
 {
@@ -121,7 +122,7 @@ public:
 		int ErrorID = 0;
 		char name[64];
 		sprintf_s(name, "C:/CameraRecord/sucai%d.avi", m_hCamera);
-		ErrorID = CameraInitRecord(m_hCamera, 1, name, true, 80, 60);
+		ErrorID = CameraInitRecord(m_hCamera, 0, name, false, 80, 60);
 		if (!ErrorID)
 			printf("Camera %d CameraInitRecord\n", m_hCamera);
 		else
@@ -158,6 +159,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	set_threshold(Threshold);
 	printf("请输入视频帧数：\n");
 	scanf_s("%d", &VideoLenth);
+	printf("请输入视频信号延迟时间（毫秒）：\n");
+	scanf_s("%d", &VideoSleep);
 
 	Camera* pCamera1 = new Camera();
 	Camera* pCamera2 = new Camera();
@@ -187,7 +190,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		case 3:
 		{
 			isVideoOK = true;
-			Sleep(800);
+			Sleep(VideoSleep);
 			pCamera1->m_isRecord = false;
 			pCamera2->m_isRecord = false;
 			pCamera1->saveVideo();
